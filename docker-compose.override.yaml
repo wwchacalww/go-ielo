@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  backend:
+    volumes:
+      - ./.zsh/.p10k.zsh:/home/chacal/.p10k.zsh:delegated
+      - ./.zsh/history:/home/chacal/zsh:delegated
