@@ -8,14 +8,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TextIsValid_Valid(t *testing.T) {
+func TestIsValid_Valid(t *testing.T) {
 	user := model.NewUser()
 	user.Name = "Test Name"
 	user.Email = "test@email.com"
 	user.Password = "passwordTest"
 	user.Role = "TestRole"
 
-	log.Println(user.GetID())
+	log.Println(user.GetAvatarUrl())
 	require.NotNil(t, user.GetID())
 	require.Equal(t, user.GetName(), "Test Name")
 	require.Equal(t, user.GetRole(), "TestRole")

@@ -15,22 +15,25 @@ type UserInterface interface {
 	GetPassword() string
 	GetRole() string
 	GetStatus() bool
+	GetAvatarUrl() string
 }
 
 type User struct {
-	ID       string `valid:"uuidv4"`
-	Name     string `valid:"required,stringlength(5|20)"`
-	Email    string `valid:"email,required"`
-	Password string `valid:"required"`
-	Role     string `valid:"optional"`
-	Status   bool   `valid:"optional"`
+	ID        string `valid:"uuidv4"`
+	Name      string `valid:"required,stringlength(5|20)"`
+	Email     string `valid:"email,required"`
+	Password  string `valid:"required"`
+	Role      string `valid:"optional"`
+	Status    bool   `valid:"optional"`
+	AvatarUrl string `valid:"optional"`
 }
 
 func NewUser() *User {
 	user := User{
-		ID:     uuid.NewV4().String(),
-		Role:   "Guest",
-		Status: true,
+		ID:        uuid.NewV4().String(),
+		Role:      "Guest",
+		Status:    true,
+		AvatarUrl: uuid.NewV4().String() + ".jpg",
 	}
 
 	return &user
@@ -76,4 +79,8 @@ func (u *User) GetRole() string {
 
 func (u *User) GetStatus() bool {
 	return u.Status
+}
+
+func (u *User) GetAvatarUrl() string {
+	return u.AvatarUrl
 }

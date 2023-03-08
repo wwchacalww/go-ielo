@@ -42,7 +42,7 @@ func (repo *AuthRepository) Authenticate(email, password string) (repository.Aut
 	}
 
 	secret_JWT := "secret_jwt" // put on .env
-	token, err := utils.CreateJWToken(user.GetName(), user.GetEmail(), user.GetRole(), secret_JWT)
+	token, err := utils.CreateJWToken(user.GetName(), user.GetEmail(), user.GetRole(), user.GetAvatarUrl(), secret_JWT)
 	log.Println(token)
 	if err != nil {
 		return repository.AuthenticateOutput{}, err
@@ -81,7 +81,7 @@ func (repo *AuthRepository) RefreshToken(email, refresh_token string) (repositor
 	}
 
 	secret_JWT := "secret_jwt" // put on .env
-	token, err := utils.CreateJWToken(acc.Name, acc.Email, acc.Role, secret_JWT)
+	token, err := utils.CreateJWToken(acc.Name, acc.Email, acc.Role, user.GetAvatarUrl(), secret_JWT)
 	log.Println(token)
 	if err != nil {
 		return repository.AuthenticateOutput{}, err

@@ -45,12 +45,14 @@ func (a *AuthDB) CreateRefreshToken(rt model.RefreshTokenInterface) (model.Refre
 
 func (a *AuthDB) CheckAccount(email string) (model.UserInterface, error) {
 	var user model.User
-	stmt, err := a.db.Prepare("select id, name, email, password, status, role from users where email=$1")
+	stmt, err := a.db.Prepare("select id, name, email, password, status, role, avatar_url from users where email=$1")
 	if err != nil {
 		return nil, err
 	}
 
-	err = stmt.QueryRow(email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Status, &user.Role)
+	var avatar_url sql.NullString
+	err = stmt.QueryRow(email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Status, &user.Role, &avatar_url)
+	user.AvatarUrl = avatar_url.String
 	if err != nil {
 		return nil, err
 	}

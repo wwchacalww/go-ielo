@@ -3,8 +3,12 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
+	"os"
 	"wwchacalww/go-psyc/domain/repository"
+	"wwchacalww/go-psyc/domain/utils"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
@@ -31,6 +35,7 @@ func MakeUserHandlers(r *chi.Mux, repo repository.UserRepositoryInterface) {
 			r.Put("/change/password", handler.ChangePassword)
 			r.Put("/change/my/password", handler.ChangeMyPassword)
 			r.Put("/change/role", handler.ChangeRole)
+			r.Put("/change/avatar", handler.ChangeAvatarUrl)
 		})
 	})
 
@@ -226,4 +231,60 @@ func (u *UserHandler) ChangeRole(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(201)
 	w.Write(jsonError("Role updated"))
+}
+
+func (u *UserHandler) ChangeAvatarUrl(w http.ResponseWriter, r *http.Request) {
+	token, _, _ := jwtauth.FromContext(r.Context())
+	tokenEmail, _ := token.Get("email")
+	tokenAvatar, _ := token.Get("avatar_url")
+	email := fmt.Sprintf("%v", tokenEmail)
+	oldAvatar := fmt.Sprintf("%v", tokenAvatar)
+	log.Println(oldAvatar)
+	os.Remove("public/imgs/" + oldAvatar)
+	f, fh, err := r.FormFile("avatar")
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	err = utils.AvatarIsValid(fh)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	defer f.Close()
+	avatar_url, err := u.UserRepository.ChangeAvatarUrl(email)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	dst, err := os.Create("./public/imgs/" + avatar_url)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer dst.Close()
+
+	_, err = io.Copy(dst, f)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	err = utils.AvatarResize(avatar_url)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	w.WriteHeader(201)
+	w.Write(jsonError("Avatar updated"))
 }
