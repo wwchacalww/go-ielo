@@ -4,6 +4,8 @@ import (
 	"wwchacalww/go-psyc/domain/model"
 	"wwchacalww/go-psyc/domain/repository"
 	"wwchacalww/go-psyc/domain/utils"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 type UserRepository struct {
@@ -72,4 +74,13 @@ func (repo *UserRepository) ChangePassword(id, pwd string) error {
 func (repo *UserRepository) ChangeRole(id, role string) error {
 	err := repo.Persistence.ChangeRole(id, role)
 	return err
+}
+
+func (repo *UserRepository) ChangeAvatarUrl(email string) (string, error) {
+	avatar_url := uuid.NewV4().String() + ".jpg"
+	err := repo.Persistence.ChangeAvatarUrl(email, avatar_url)
+	if err != nil {
+		return "", err
+	}
+	return avatar_url, nil
 }

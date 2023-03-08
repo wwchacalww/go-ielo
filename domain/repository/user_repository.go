@@ -18,6 +18,7 @@ type UserRepositoryInterface interface {
 	List() ([]model.UserInterface, error)
 	ChangePassword(id, pwd string) error
 	ChangeRole(id, role string) error
+	ChangeAvatarUrl(email string) (string, error)
 }
 
 type UserPersistenceInterface interface {
@@ -27,4 +28,5 @@ type UserPersistenceInterface interface {
 	List() ([]model.UserInterface, error)
 	ChangePassword(id, pwd string) error
 	ChangeRole(id, role string) error
+	ChangeAvatarUrl(email, avatar_url string) error
 }

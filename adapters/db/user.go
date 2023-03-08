@@ -45,12 +45,12 @@ func (u *UserDB) Create(user model.UserInterface) error {
 
 func (u *UserDB) FindById(id string) (model.UserInterface, error) {
 	var user model.User
-	stmt, err := u.db.Prepare("select id, name, email, password, status, role from users where id=$1")
+	stmt, err := u.db.Prepare("select id, name, email, password, status, role, avatar_url from users where id=$1")
 	if err != nil {
 		return nil, err
 	}
 
-	err = stmt.QueryRow(id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Status, &user.Role)
+	err = stmt.QueryRow(id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Status, &user.Role, &user.AvatarUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +59,12 @@ func (u *UserDB) FindById(id string) (model.UserInterface, error) {
 
 func (u *UserDB) FindByEmail(email string) (model.UserInterface, error) {
 	var user model.User
-	stmt, err := u.db.Prepare("select id, name, email, password, status, role from users where email=$1")
+	stmt, err := u.db.Prepare("select id, name, email, password, status, role, avatar_url from users where email=$1")
 	if err != nil {
 		return nil, err
 	}
 
-	err = stmt.QueryRow(email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Status, &user.Role)
+	err = stmt.QueryRow(email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Status, &user.Role, &user.AvatarUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -73,14 +73,16 @@ func (u *UserDB) FindByEmail(email string) (model.UserInterface, error) {
 
 func (u *UserDB) List() ([]model.UserInterface, error) {
 	var users []model.UserInterface
-	rows, err := u.db.Query("SELECT id, name, email, password, role, status FROM users")
+	rows, err := u.db.Query("SELECT id, name, email, password, role, status, avatar_url FROM users")
 	if err != nil {
 		return nil, err
 	}
 
 	for rows.Next() {
 		var user model.User
-		err = rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role, &user.Status)
+		var avatar sql.NullString
+		err = rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role, &user.Status, &avatar)
+		user.AvatarUrl = avatar.String
 		if err != nil {
 			return nil, err
 		}
@@ -97,5 +99,10 @@ func (u *UserDB) ChangePassword(id, pwd string) error {
 
 func (u *UserDB) ChangeRole(id, role string) error {
 	_, err := u.db.Exec("UPDATE users SET role=$2 WHERE id=$1", id, role)
+	return err
+}
+
+func (u *UserDB) ChangeAvatarUrl(email, avatar_url string) error {
+	_, err := u.db.Exec("UPDATE users SET avatar_url=$2 WHERE email=$1", email, avatar_url)
 	return err
 }

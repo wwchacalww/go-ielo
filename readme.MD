@@ -23,6 +23,11 @@ Repository for studying and practicing GOLANG applied in a psychology clinic
  - [X] Create jsonError to manipulate messages errors
  - [X] Create User handler server
    - [X] Create user
+     - [X] Avartar URL e static server image
+     - [X] Upload Image
+       - [ ] Verify dimension and size
+       - [ ] Resize image and save
+     - [X] Save avartar_url on DB
    - [X] FindById
    - [X] List users
    - [X] FindByEmail

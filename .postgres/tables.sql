@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
 	password VARCHAR NOT NULL,
 	role VARCHAR NOT NULL,
 	status bool NOT NULL,
+	avatar_url VARCHAR NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	PRIMARY KEY (id)
