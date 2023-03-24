@@ -9,7 +9,7 @@ Repository for studying and practicing GOLANG applied in a psychology clinic
  - [X] Config P10k and zsh history
 
 ## App
- - [ ] Create repositório on Github
+ - [X] Create repositório on Github
  - [X] Create entity accounts
  - [X] Test entity users
  - [X] Create service users and test
@@ -33,6 +33,8 @@ Repository for studying and practicing GOLANG applied in a psychology clinic
    - [X] FindByEmail
    - [X] ChangePassword
    - [X] ChangeRole
+   - [ ] Change My Avatar
+   - [ ] Change Avatar
  - [X] Authenticate and Authorization
    - [X] Create entity RefreshToken
    - [X] Authenticate
@@ -62,8 +64,8 @@ Repository for studying and practicing GOLANG applied in a psychology clinic
    - [ ] Update Professional in mass
 
 ## Domains - Professionals
- - [ ] Create entity
- - [ ] Test entity Professional
+ - [X] Create entity
+ - [X] Test entity Professional
  - [ ] Create repository Professional
  - [ ] Create persistence db and test
  - [ ] Create table on postgresql

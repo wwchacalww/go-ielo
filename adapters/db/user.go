@@ -59,12 +59,14 @@ func (u *UserDB) FindById(id string) (model.UserInterface, error) {
 
 func (u *UserDB) FindByEmail(email string) (model.UserInterface, error) {
 	var user model.User
+	var avatar sql.NullString
 	stmt, err := u.db.Prepare("select id, name, email, password, status, role, avatar_url from users where email=$1")
 	if err != nil {
 		return nil, err
 	}
 
-	err = stmt.QueryRow(email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Status, &user.Role, &user.AvatarUrl)
+	err = stmt.QueryRow(email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Status, &user.Role, &avatar)
+	user.AvatarUrl = avatar.String
 	if err != nil {
 		return nil, err
 	}

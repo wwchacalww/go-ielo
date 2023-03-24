@@ -36,6 +36,7 @@ func MakeUserHandlers(r *chi.Mux, repo repository.UserRepositoryInterface) {
 			r.Put("/change/my/password", handler.ChangeMyPassword)
 			r.Put("/change/role", handler.ChangeRole)
 			r.Put("/change/avatar", handler.ChangeAvatarUrl)
+			r.Put("/change/my/avatar", handler.ChangeMyAvatarUrl)
 		})
 	})
 
@@ -233,7 +234,7 @@ func (u *UserHandler) ChangeRole(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonError("Role updated"))
 }
 
-func (u *UserHandler) ChangeAvatarUrl(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) ChangeMyAvatarUrl(w http.ResponseWriter, r *http.Request) {
 	token, _, _ := jwtauth.FromContext(r.Context())
 	tokenEmail, _ := token.Get("email")
 	tokenAvatar, _ := token.Get("avatar_url")
@@ -241,6 +242,74 @@ func (u *UserHandler) ChangeAvatarUrl(w http.ResponseWriter, r *http.Request) {
 	oldAvatar := fmt.Sprintf("%v", tokenAvatar)
 	log.Println(oldAvatar)
 	os.Remove("public/imgs/" + oldAvatar)
+	f, fh, err := r.FormFile("avatar")
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	err = utils.AvatarIsValid(fh)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	defer f.Close()
+	avatar_url, err := u.UserRepository.ChangeAvatarUrl(email)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	dst, err := os.Create("./public/imgs/" + avatar_url)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer dst.Close()
+
+	_, err = io.Copy(dst, f)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	err = utils.AvatarResize(avatar_url)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	w.WriteHeader(201)
+	w.Write(jsonError("Avatar updated"))
+}
+
+func (u *UserHandler) ChangeAvatarUrl(w http.ResponseWriter, r *http.Request) {
+	token, _, _ := jwtauth.FromContext(r.Context())
+	role, _ := token.Get("role")
+	if role != "Admin" {
+		log.Println(role)
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write(jsonError("Access denied"))
+		return
+	}
+
+	email := r.FormValue("email")
+	user, err := u.UserRepository.FindByEmail(email)
+	if err != nil {
+		log.Println(email)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(jsonError(err.Error()))
+		return
+	}
+
+	os.Remove("public/imgs/" + user.GetAvatarUrl())
 	f, fh, err := r.FormFile("avatar")
 
 	if err != nil {
